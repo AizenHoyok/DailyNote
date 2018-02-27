@@ -1,0 +1,47 @@
+* Android应用视图的载体:View
+** View的生命周期与activity的生命周期的关系
+   1. View的生命周期与Activity的生命周期的关系
+      1. Activity create
+         - CustomView
+         - View onFinishInflate 当xml加载完成时调用
+         - Activity onStart
+         - Activity onResume
+         - View onAttchedToWindow View绑定到窗口
+         - View onWindowVisibilityChanged View所在窗口可见性发生变化
+         - View onVisibilityChanged View本身可见性发生变化
+         - View onMeasure View开始测量本身及其子View的大小
+         - View onSizeChanged View大小确定
+         - View onLayout View及其子View开始布局
+         - View onMeasure 再次测量
+         - View onLayout 再次布局
+         - View onDraw View及其子View开始绘制并显示到屏幕上
+      2. Activity pasue
+         - Activity onPause
+         - View onWindowvisibilitychanged View所在窗口可见性发生变化
+         - Activity onStop
+         - View onVisibilitychanged View本身可见性发生变化
+      3. Activity resume
+         - View onWindowvisibilitychanged View所在窗口可见性发生变化
+         - Activity onStart
+         - Activity onResume
+         - View onVisibilitychanged View本身可见性发生变化
+         - View onWindowvisibilitychanged View所在窗口可见性发生变化[完全可见]
+         - View onDraw View及其子view开始绘制并显示到屏幕上
+         - View onWindowFocusChanged View所在窗口获得焦点
+      4. Activity Destory
+         - Activity onDestory
+         - View onDetachedFromWindow View从窗口分离
+** View的测量
+   1. View测量onMeasure中,MeasureSpec是很重要的,它是一个32位的Int值,高2位表示测量模式,低30位表示测量模式下的大小,当View的测量模式不同,View的大小也不同,获取大小的方式也有所区别
+   2. 应用窗口的顶级视图DecorView继承自FrameLayout,它的测量由其子View的onMeasure来决定.
+   3. 我们可以通过getMeasuredWidth()方法和getMeasuredHeight()方法来获得View的宽高,但是在某些情况下,系统需要多次调用onMeasure才能确定View的宽高,因此在onMeasure中获得的宽高并不准确,比较好的做法是在onLayout中获取View的宽高
+** View的布局
+   1. View本身由于没有子View,所以View的onLayout方法什么也不做
+   2. ViewGroup在布局时,首先会确认子View的数量[可见的]并根据Gravity[水平布局或垂直布局]来确定每个子View应该在的位置,并不断调用子View的layout方法,把他们的位置和尺寸传给他们,让他们完成自我的内部布局
+** View的绘制
+   1. View绘制时,首先确定当前是否为滑动状态,然后确定是否需要缩放,根据测量得到的大小和布局得到的位置,创建一张画布,在画布上来绘制UI,Android应用程序窗口首先使用skia图形库api来绘制在一张画布上,实际上是在这块画布的一个图形缓冲区中,这块图形缓冲区最终会交给SufaceFlinger服务,而SufaceFlinger服务再使用OpenGL图形库api将这个图形缓冲区渲染到硬件帧缓冲区中
+** View的事件分发
+   1. 事件的传递是按照Activity->Window->View的顺序传递的
+   2. 一般情况下,一个事件序列只能给一个View拦截并消耗,一个View如果拦截了事件,则該事件的后续事件都交由该View处理
+   3. ViewGroup默认不拦截任何事件
+   4. View没有onInterceptTouchEvent方法,一旦有点击事件传递给它,它的onTouchEvent方法就会被调用
